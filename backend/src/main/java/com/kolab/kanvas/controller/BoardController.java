@@ -20,6 +20,7 @@ public class BoardController {
 
     private final BoardService boardService;
     private final com.kolab.kanvas.service.AiSummaryService aiSummaryService;
+    private final com.kolab.kanvas.service.TranscriptService transcriptService;
 
     @PostMapping
     public ResponseEntity<BoardDto> createBoard(@AuthenticationPrincipal User currentUser,
@@ -99,5 +100,22 @@ public class BoardController {
     public ResponseEntity<com.kolab.kanvas.dto.SummaryDto> getSummary(@AuthenticationPrincipal User currentUser,
                                                                      @PathVariable("id") String boardId) {
         return ResponseEntity.ok(aiSummaryService.getLatestSummary(currentUser, boardId));
+    }
+
+    @GetMapping("/{id}/transcript")
+    public ResponseEntity<List<com.kolab.kanvas.model.Transcript>> getTranscript(@AuthenticationPrincipal User currentUser,
+                                                                                @PathVariable("id") String boardId,
+                                                                                @RequestParam(value = "userId", required = false) String userId,
+                                                                                @RequestParam(value = "actionType", required = false) String actionType) {
+        return ResponseEntity.ok(transcriptService.getTranscripts(currentUser, boardId, userId, actionType));
+    }
+
+    @GetMapping(value = "/{id}/transcript/export", produces = "text/csv")
+    public ResponseEntity<String> exportTranscriptCsv(@AuthenticationPrincipal User currentUser,
+                                                     @PathVariable("id") String boardId) {
+        String csvData = transcriptService.exportTranscriptCsv(currentUser, boardId);
+        return ResponseEntity.ok()
+                .header("Content-Disposition", "attachment; filename=\"transcript-" + boardId + ".csv\"")
+                .body(csvData);
     }
 }
