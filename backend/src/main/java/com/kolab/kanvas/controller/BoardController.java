@@ -19,6 +19,7 @@ import java.util.List;
 public class BoardController {
 
     private final BoardService boardService;
+    private final com.kolab.kanvas.service.AiSummaryService aiSummaryService;
 
     @PostMapping
     public ResponseEntity<BoardDto> createBoard(@AuthenticationPrincipal User currentUser,
@@ -85,5 +86,18 @@ public class BoardController {
                                                                              @PathVariable("id") String boardId,
                                                                              @RequestParam(value = "defaultRole", defaultValue = "VIEWER") String defaultRole) {
         return ResponseEntity.ok(boardService.generateShareLink(currentUser, boardId, defaultRole));
+    }
+
+    @PostMapping("/{id}/summary")
+    public ResponseEntity<com.kolab.kanvas.dto.SummaryDto> generateSummary(@AuthenticationPrincipal User currentUser,
+                                                                          @PathVariable("id") String boardId,
+                                                                          @RequestParam(value = "force", defaultValue = "false") boolean force) {
+        return ResponseEntity.ok(aiSummaryService.generateSummary(currentUser, boardId, force));
+    }
+
+    @GetMapping("/{id}/summary")
+    public ResponseEntity<com.kolab.kanvas.dto.SummaryDto> getSummary(@AuthenticationPrincipal User currentUser,
+                                                                     @PathVariable("id") String boardId) {
+        return ResponseEntity.ok(aiSummaryService.getLatestSummary(currentUser, boardId));
     }
 }
