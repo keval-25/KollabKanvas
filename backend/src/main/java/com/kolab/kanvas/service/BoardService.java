@@ -115,6 +115,74 @@ public class BoardService {
         return BoardDto.fromEntity(saved, currentUser.getId(), currentUser.getName());
     }
 
+    public BoardDto inviteCollaborator(User currentUser, String boardId, com.kolab.kanvas.dto.InviteCollaboratorRequest request) {
+        Board board = boardRepository.findById(boardId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Board not found"));
+        verifyOwnerAccess(currentUser.getId(), board);
+
+        User invitee = userRepository.findByEmail(request.getEmail().toLowerCase().trim())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found with email: " + request.getEmail()));
+
+        if (board.getCollaborators() == null) {
+            board.setCollaborators(new ArrayList<>());
+        }
+
+        // Check if already a collaborator
+        board.getCollaborators().removeIf(c -> c.getUserId().equals(invitee.getId()));
+        board.getCollaborators().add(Collaborator.builder()
+                .userId(invitee.getId())
+                .role(request.getRole().toUpperCase())
+                .addedAt(Instant.now())
+                .build());
+
+        Board saved = boardRepository.save(board);
+        return BoardDto.fromEntity(saved, currentUser.getId(), currentUser.getName());
+    }
+
+    public BoardDto updateCollaboratorRole(User currentUser, String boardId, String targetUserId, com.kolab.kanvas.dto.UpdateRoleRequest request) {
+        Board board = boardRepository.findById(boardId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Board not found"));
+        verifyOwnerAccess(currentUser.getId(), board);
+
+        if (board.getCollaborators() != null) {
+            board.getCollaborators().stream()
+                    .filter(c -> c.getUserId().equals(targetUserId))
+                    .findFirst()
+                    .ifPresent(c -> c.setRole(request.getRole().toUpperCase()));
+        }
+
+        Board saved = boardRepository.save(board);
+        return BoardDto.fromEntity(saved, currentUser.getId(), currentUser.getName());
+    }
+
+    public void revokeCollaborator(User currentUser, String boardId, String targetUserId) {
+        Board board = boardRepository.findById(boardId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Board not found"));
+        verifyOwnerAccess(currentUser.getId(), board);
+
+        if (board.getCollaborators() != null) {
+            board.getCollaborators().removeIf(c -> c.getUserId().equals(targetUserId));
+        }
+        boardRepository.save(board);
+    }
+
+    public com.kolab.kanvas.model.ShareLink generateShareLink(User currentUser, String boardId, String defaultRole) {
+        Board board = boardRepository.findById(boardId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Board not found"));
+        verifyOwnerAccess(currentUser.getId(), board);
+
+        String token = UUID.randomUUID().toString().replace("-", "");
+        com.kolab.kanvas.model.ShareLink shareLink = com.kolab.kanvas.model.ShareLink.builder()
+                .token(token)
+                .defaultRole(defaultRole != null ? defaultRole.toUpperCase() : "VIEWER")
+                .expiresAt(Instant.now().plusSeconds(86400 * 30)) // 30 days
+                .build();
+
+        board.setShareLink(shareLink);
+        boardRepository.save(board);
+        return shareLink;
+    }
+
     public void verifyUserAccess(String userId, Board board) {
         boolean isOwner = board.getOwnerId().equals(userId);
         boolean isCollaborator = board.getCollaborators() != null &&
