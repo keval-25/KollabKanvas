@@ -1,5 +1,6 @@
 package com.kolab.kanvas;
 
+import com.kolab.kanvas.repository.BoardRepository;
 import com.kolab.kanvas.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -16,6 +17,9 @@ class KanvasApplicationTests {
 
     @MockBean
     private UserRepository userRepository;
+
+    @MockBean
+    private BoardRepository boardRepository;
 
     @MockBean
     private MongoTemplate mongoTemplate;
