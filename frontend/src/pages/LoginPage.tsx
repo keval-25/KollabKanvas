@@ -4,9 +4,10 @@ import { LogIn, Sparkles } from 'lucide-react';
 
 interface LoginPageProps {
   onSwitchToRegister: () => void;
+  onLoginSuccess?: () => void;
 }
 
-export const LoginPage: React.FC<LoginPageProps> = ({ onSwitchToRegister }) => {
+export const LoginPage: React.FC<LoginPageProps> = ({ onSwitchToRegister, onLoginSuccess }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const { login, isLoading, error } = useAuthStore();
@@ -16,6 +17,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSwitchToRegister }) => {
     if (!email || !password) return;
     try {
       await login({ email, password });
+      if (onLoginSuccess) onLoginSuccess();
     } catch (err) {
       // Error is handled in store
     }

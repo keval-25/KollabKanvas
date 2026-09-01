@@ -12,6 +12,7 @@ interface AuthState {
   register: (credentials: RegisterCredentials) => Promise<void>;
   logout: () => Promise<void>;
   checkAuth: () => Promise<void>;
+  setAuth: (user: User, token: string) => void;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -20,6 +21,11 @@ export const useAuthStore = create<AuthState>((set) => ({
   isAuthenticated: false,
   isLoading: true,
   error: null,
+
+  setAuth: (user, token) => {
+    localStorage.setItem('token', token);
+    set({ user, token, isAuthenticated: true, isLoading: false });
+  },
 
   login: async (credentials) => {
     set({ isLoading: true, error: null });
