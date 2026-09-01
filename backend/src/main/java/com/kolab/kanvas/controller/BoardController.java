@@ -56,4 +56,34 @@ public class BoardController {
                                                    @PathVariable("id") String boardId) {
         return ResponseEntity.ok(boardService.duplicateBoard(currentUser, boardId));
     }
+
+    @PostMapping("/{id}/collaborators")
+    public ResponseEntity<BoardDto> inviteCollaborator(@AuthenticationPrincipal User currentUser,
+                                                       @PathVariable("id") String boardId,
+                                                       @Valid @RequestBody com.kolab.kanvas.dto.InviteCollaboratorRequest request) {
+        return ResponseEntity.ok(boardService.inviteCollaborator(currentUser, boardId, request));
+    }
+
+    @PatchMapping("/{id}/collaborators/{userId}")
+    public ResponseEntity<BoardDto> updateCollaboratorRole(@AuthenticationPrincipal User currentUser,
+                                                           @PathVariable("id") String boardId,
+                                                           @PathVariable("userId") String targetUserId,
+                                                           @Valid @RequestBody com.kolab.kanvas.dto.UpdateRoleRequest request) {
+        return ResponseEntity.ok(boardService.updateCollaboratorRole(currentUser, boardId, targetUserId, request));
+    }
+
+    @DeleteMapping("/{id}/collaborators/{userId}")
+    public ResponseEntity<Void> revokeCollaborator(@AuthenticationPrincipal User currentUser,
+                                                   @PathVariable("id") String boardId,
+                                                   @PathVariable("userId") String targetUserId) {
+        boardService.revokeCollaborator(currentUser, boardId, targetUserId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{id}/share-link")
+    public ResponseEntity<com.kolab.kanvas.model.ShareLink> generateShareLink(@AuthenticationPrincipal User currentUser,
+                                                                             @PathVariable("id") String boardId,
+                                                                             @RequestParam(value = "defaultRole", defaultValue = "VIEWER") String defaultRole) {
+        return ResponseEntity.ok(boardService.generateShareLink(currentUser, boardId, defaultRole));
+    }
 }
