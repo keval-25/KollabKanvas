@@ -25,6 +25,9 @@ class KanvasApplicationTests {
     private com.kolab.kanvas.repository.SummaryRepository summaryRepository;
 
     @MockBean
+    private com.kolab.kanvas.repository.TranscriptRepository transcriptRepository;
+
+    @MockBean
     private MongoTemplate mongoTemplate;
 
     @MockBean
