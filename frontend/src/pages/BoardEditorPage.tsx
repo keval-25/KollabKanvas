@@ -7,7 +7,8 @@ import { CanvasRenderer } from '../components/canvas/CanvasRenderer';
 import { CursorLayer } from '../components/canvas/CursorLayer';
 import { Toolbar } from '../components/toolbar/Toolbar';
 import { PresenceBar } from '../components/toolbar/PresenceBar';
-import { ArrowLeft, Share2, Sparkles, FileText } from 'lucide-react';
+import { ArrowLeft, Share2, Sparkles, FileText, Download } from 'lucide-react';
+import { exportBoardAsPng } from '../utils/exportBoard';
 
 interface BoardEditorPageProps {
   boardId: string;
@@ -115,6 +116,13 @@ export const BoardEditorPage: React.FC<BoardEditorPageProps> = ({
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           <PresenceBar />
+
+          <button onClick={() => {
+            const canvas = document.querySelector('canvas');
+            if (canvas) exportBoardAsPng(canvas, `${boardName}.png`);
+          }} className="btn-secondary" style={{ padding: '0.4rem 0.75rem' }}>
+            <Download size={16} /> Export Image
+          </button>
 
           {onOpenSummaryPanel && (
             <button onClick={onOpenSummaryPanel} className="btn-secondary" style={{ padding: '0.4rem 0.75rem' }}>
