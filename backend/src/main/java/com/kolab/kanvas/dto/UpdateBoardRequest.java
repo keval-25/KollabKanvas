@@ -13,4 +13,5 @@ public class UpdateBoardRequest {
 
     private String name;
     private Boolean isArchived;
+    private java.util.List<com.kolab.kanvas.model.BoardElement> elements;
 }

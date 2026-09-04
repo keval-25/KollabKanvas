@@ -7,24 +7,46 @@ interface ShareModalProps {
   isOpen: boolean;
   onClose: () => void;
   boardId: string;
-  collaborators: Collaborator[];
+  collaborators?: Collaborator[];
   shareToken?: string;
-  onRefreshBoard: () => void;
+  onRefreshBoard?: () => void;
 }
 
 export const ShareModal: React.FC<ShareModalProps> = ({
   isOpen,
   onClose,
   boardId,
-  collaborators,
-  shareToken,
+  collaborators: initialCollaborators = [],
+  shareToken: initialShareToken = '',
   onRefreshBoard,
 }) => {
   const [email, setEmail] = useState('');
   const [role, setRole] = useState<'EDITOR' | 'COMMENTER' | 'VIEWER'>('EDITOR');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
-  const [currentShareToken, setCurrentShareToken] = useState(shareToken || '');
+  const [currentShareToken, setCurrentShareToken] = useState(initialShareToken);
+  const [collaboratorsList, setCollaboratorsList] = useState<Collaborator[]>(initialCollaborators);
+
+  const refreshBoardDetails = async () => {
+    try {
+      const res = await api.get(`/boards/${boardId}`);
+      if (res.data.collaborators) {
+        setCollaboratorsList(res.data.collaborators);
+      }
+      if (res.data.shareToken) {
+        setCurrentShareToken(res.data.shareToken);
+      }
+      if (onRefreshBoard) onRefreshBoard();
+    } catch (e) {
+      // Ignore
+    }
+  };
+
+  React.useEffect(() => {
+    if (isOpen && boardId) {
+      refreshBoardDetails();
+    }
+  }, [isOpen, boardId]);
 
   if (!isOpen) return null;
 
@@ -191,10 +213,10 @@ export const ShareModal: React.FC<ShareModalProps> = ({
         {/* Collaborators List */}
         <div>
           <h4 style={{ fontSize: '0.875rem', fontWeight: 600, color: '#cbd5e1', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
-            <Shield size={16} color="#6366f1" /> Collaborators ({collaborators.length})
+            <Shield size={16} color="#6366f1" /> Collaborators ({collaboratorsList.length})
           </h4>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: '180px', overflowY: 'auto' }}>
-            {collaborators.map((c) => (
+            {collaboratorsList.map((c) => (
               <div
                 key={c.userId}
                 style={{
