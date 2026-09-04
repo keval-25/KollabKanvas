@@ -15,7 +15,22 @@ This document serves as the persistent, complete context summary for **KollabKan
 
 ---
 
-## 2. Completed Phase-by-Phase Implementation Log
+## 2. Recent Local Setup Progress & System Status
+
+- **WSL 2 Installation Status:** Completed (`wsl --install` executed successfully). System restart required for Virtual Machine Platform to take effect.
+- **Docker Desktop Setup (Post-Reboot Step):**
+  1. Restart PC.
+  2. Install [Docker Desktop for Windows](https://www.docker.com/products/docker-desktop/).
+  3. Launch Docker Desktop and run: `docker compose up -d --build` in `c:\CHECKOUTS\ksheth25-\KollabKanvas`.
+- **Local MongoDB & Redis Database Setup Options:**
+  - **MongoDB:** Cloud MongoDB Atlas (`spring.data.mongodb.uri=mongodb+srv://...`) or local MongoDB Community Server on `localhost:27017`.
+  - **Redis:** Cloud Upstash Redis or Memurai for Windows on `localhost:6379`.
+- **Frontend Dev Server Status:** Verified running on `http://127.0.0.1:5173/`.
+- **Instant Demo Mode:** Verified working with interactive RoughJS canvas, yellow sticky notes, AI summary drawer, and transcript panel.
+
+---
+
+## 3. Completed Phase-by-Phase Implementation Log
 
 All 10 implementation phases specified in SRS and Design documents have been fully built, tested (`./gradlew test` and `npm run build`), committed to individual feature branches, pushed to remote `origin`, and merged into `develop` and `main`:
 
@@ -34,7 +49,7 @@ All 10 implementation phases specified in SRS and Design documents have been ful
 
 ---
 
-## 3. Technology Stack & Key Architecture
+## 4. Technology Stack & Key Architecture
 
 ### Backend Stack
 - **Framework:** Spring Boot 3.3.4 (Java 17)
@@ -54,7 +69,7 @@ All 10 implementation phases specified in SRS and Design documents have been ful
 
 ---
 
-## 4. Key Configuration Files & Entry Points
+## 5. Key Configuration Files & Entry Points
 
 - **Backend Entry Point:** [`KanvasApplication.java`](file:///c:/CHECKOUTS/ksheth25-/KollabKanvas/backend/src/main/java/com/kolab/kanvas/KanvasApplication.java)
 - **Security & JWT Configuration:** [`SecurityConfig.java`](file:///c:/CHECKOUTS/ksheth25-/KollabKanvas/backend/src/main/java/com/kolab/kanvas/security/SecurityConfig.java)
@@ -67,12 +82,12 @@ All 10 implementation phases specified in SRS and Design documents have been ful
 
 ---
 
-## 5. Local Execution Commands
+## 6. Local Execution Commands
 
-### Docker Compose (Single-Command)
+### Docker Compose (Post-Reboot)
 ```powershell
 cd c:\CHECKOUTS\ksheth25-\KollabKanvas
-docker-compose up -d --build
+docker compose up -d --build
 # Access UI at http://localhost
 ```
 
