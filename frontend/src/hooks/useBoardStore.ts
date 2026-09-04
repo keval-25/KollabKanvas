@@ -6,6 +6,7 @@ interface BoardStoreState {
   boardId: string | null;
   boardName: string;
   userRole: 'OWNER' | 'EDITOR' | 'COMMENTER' | 'VIEWER';
+  collaborators: import('../types/board').Collaborator[];
   elements: BoardElement[];
   selectedElementId: string | null;
   
@@ -52,6 +53,7 @@ export const useBoardStore = create<BoardStoreState>((set, get) => ({
   boardId: null,
   boardName: 'Untitled Board',
   userRole: 'EDITOR',
+  collaborators: [],
   elements: [],
   selectedElementId: null,
 

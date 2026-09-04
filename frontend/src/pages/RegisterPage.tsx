@@ -4,9 +4,10 @@ import { UserPlus, Sparkles } from 'lucide-react';
 
 interface RegisterPageProps {
   onSwitchToLogin: () => void;
+  onRegisterSuccess?: () => void;
 }
 
-export const RegisterPage: React.FC<RegisterPageProps> = ({ onSwitchToLogin }) => {
+export const RegisterPage: React.FC<RegisterPageProps> = ({ onSwitchToLogin, onRegisterSuccess }) => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -17,6 +18,7 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({ onSwitchToLogin }) =
     if (!name || !email || !password) return;
     try {
       await register({ name, email, password });
+      if (onRegisterSuccess) onRegisterSuccess();
     } catch (err) {
       // Error handled in store
     }
