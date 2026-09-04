@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: kollabkanvas-backend
+    env: docker
+    region: oregon
+    plan: free
+    dockerfilePath: backend/Dockerfile
+    dockerContext: backend
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: docker
+      - key: REDIS_PORT
+        value: "6379"
+      - key: REDIS_SSL
+        value: "true"
+      - key: CORS_ALLOWED_ORIGINS
+        value: "*"
+      - key: MONGO_URI
+        sync: false
+      - key: REDIS_HOST
+        sync: false
+      - key: REDIS_PASSWORD
+        sync: false
+      - key: JWT_SECRET
+        sync: false
