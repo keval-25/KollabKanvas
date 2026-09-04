@@ -5,6 +5,8 @@ import { useAuthStore } from '../hooks/useAuthStore';
 import { CreateBoardModal } from '../components/dashboard/CreateBoardModal';
 import { Plus, Search, Sparkles, LogOut, Copy, Trash2, Grid, List as ListIcon, Clock, Users } from 'lucide-react';
 
+import { ThemeToggle } from '../components/toolbar/ThemeToggle';
+
 interface DashboardPageProps {
   onSelectBoard: (boardId: string) => void;
 }
@@ -84,27 +86,29 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onSelectBoard }) =
             width: '36px',
             height: '36px',
             borderRadius: '10px',
-            background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
+            background: 'linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-hover) 100%)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: '0 2px 10px rgba(99, 102, 241, 0.4)',
+            boxShadow: '0 2px 10px var(--accent-light)',
           }}>
             <Sparkles size={20} color="#ffffff" />
           </div>
-          <span style={{ fontFamily: 'var(--font-heading)', fontSize: '1.25rem', fontWeight: 700, color: '#f8fafc' }}>
+          <span style={{ fontFamily: 'var(--font-heading)', fontSize: '1.25rem', fontWeight: 700, color: 'var(--text-primary)' }}>
             KollabKanvas
           </span>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.375rem 0.75rem', borderRadius: '20px', background: 'rgba(255, 255, 255, 0.06)' }}>
+          <ThemeToggle />
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.375rem 0.75rem', borderRadius: '20px', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)' }}>
             <img
               src={user?.avatarUrl || `https://api.dicebear.com/7.x/bottts/svg?seed=${user?.email}`}
               alt={user?.name}
               style={{ width: '28px', height: '28px', borderRadius: '50%' }}
             />
-            <span style={{ fontSize: '0.875rem', fontWeight: 500, color: '#e2e8f0' }}>{user?.name}</span>
+            <span style={{ fontSize: '0.875rem', fontWeight: 500, color: 'var(--text-primary)' }}>{user?.name}</span>
           </div>
           <button onClick={() => logout()} className="btn-secondary" style={{ padding: '0.5rem 0.75rem' }}>
             <LogOut size={16} /> Sign out

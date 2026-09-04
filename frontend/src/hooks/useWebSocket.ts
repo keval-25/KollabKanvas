@@ -18,6 +18,7 @@ export const useWebSocket = (boardId: string | null) => {
 
         // Subscribe to element updates
         wsService.subscribe(`/topic/board/${boardId}/elements`, (msg: any) => {
+          if (msg.userId === user.id) return;
           if (msg.op === 'CREATE') {
             const newEl = {
               elementId: msg.elementId,

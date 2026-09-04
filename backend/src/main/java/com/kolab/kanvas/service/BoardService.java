@@ -72,13 +72,18 @@ public class BoardService {
         Board board = boardRepository.findById(boardId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Board not found"));
 
-        verifyOwnerAccess(currentUser.getId(), board);
+        verifyUserAccess(currentUser.getId(), board);
 
         if (request.getName() != null && !request.getName().isBlank()) {
+            verifyOwnerAccess(currentUser.getId(), board);
             board.setName(request.getName().trim());
         }
         if (request.getIsArchived() != null) {
+            verifyOwnerAccess(currentUser.getId(), board);
             board.setArchived(request.getIsArchived());
+        }
+        if (request.getElements() != null) {
+            board.setElements(request.getElements());
         }
 
         Board updated = boardRepository.save(board);

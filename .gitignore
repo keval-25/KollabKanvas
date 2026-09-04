@@ -1,0 +1,19 @@
+# Node & NPM
+node_modules/
+package-lock.json
+dist/
+.env.local
+.env.*.local
+
+# IDE & Editor
+.vscode/
+.idea/
+*.swp
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Temp / Scratch
+scratch/
+.gemini/

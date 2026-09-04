@@ -10,6 +10,8 @@ import { PresenceBar } from '../components/toolbar/PresenceBar';
 import { ArrowLeft, Share2, Sparkles, FileText, Download } from 'lucide-react';
 import { exportBoardAsPng } from '../utils/exportBoard';
 
+import { ThemeToggle } from '../components/toolbar/ThemeToggle';
+
 interface BoardEditorPageProps {
   boardId: string;
   onBackToDashboard: () => void;
@@ -26,7 +28,7 @@ export const BoardEditorPage: React.FC<BoardEditorPageProps> = ({
   onOpenTranscriptPanel,
 }) => {
   const [isLoading, setIsLoading] = useState(true);
-  const { setBoardData, boardName, userRole, undo, redo, deleteElement, selectedElementId } = useBoardStore();
+  const { setBoardData, boardName, userRole, addElement, updateElement, deleteElement, undo, redo, selectedElementId } = useBoardStore();
 
   const { sendElementOp, sendCursorMove } = useWebSocket(boardId);
 
@@ -48,17 +50,19 @@ export const BoardEditorPage: React.FC<BoardEditorPageProps> = ({
 
   if (isLoading) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: 'var(--bg-primary)', color: '#94a3b8' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: 'var(--bg-primary)', color: 'var(--text-secondary)' }}>
         Loading collaborative whiteboard...
       </div>
     );
   }
 
   const handleElementCreate = (element: any) => {
-    sendElementOp('CREATE', element.elementId, element.props, element.version);
+    addElement(element);
+    sendElementOp('CREATE', element.elementId, { ...element.props, type: element.type }, element.version);
   };
 
   const handleElementUpdate = (elementId: string, payload: Record<string, any>) => {
+    updateElement(elementId, payload);
     sendElementOp('UPDATE', elementId, payload);
   };
 
@@ -99,7 +103,7 @@ export const BoardEditorPage: React.FC<BoardEditorPageProps> = ({
           <button onClick={onBackToDashboard} className="btn-secondary" style={{ padding: '0.4rem 0.75rem' }}>
             <ArrowLeft size={18} /> Boards
           </button>
-          <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.125rem', fontWeight: 600, color: '#f8fafc' }}>
+          <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.125rem', fontWeight: 600, color: 'var(--text-primary)' }}>
             {boardName}
           </h2>
           <span style={{
@@ -107,8 +111,8 @@ export const BoardEditorPage: React.FC<BoardEditorPageProps> = ({
             fontWeight: 600,
             padding: '0.2rem 0.5rem',
             borderRadius: '4px',
-            background: 'rgba(99, 102, 241, 0.2)',
-            color: '#818cf8',
+            background: 'var(--accent-light)',
+            color: 'var(--accent-primary)',
           }}>
             {userRole}
           </span>
@@ -116,6 +120,7 @@ export const BoardEditorPage: React.FC<BoardEditorPageProps> = ({
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           <PresenceBar />
+          <ThemeToggle />
 
           <button onClick={() => {
             const canvas = document.querySelector('canvas');
