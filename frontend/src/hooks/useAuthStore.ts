@@ -8,6 +8,7 @@ interface AuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
+  googleLogin: (idToken: string) => Promise<void>;
   login: (credentials: LoginCredentials) => Promise<void>;
   register: (credentials: RegisterCredentials) => Promise<void>;
   logout: () => Promise<void>;
@@ -25,6 +26,21 @@ export const useAuthStore = create<AuthState>((set) => ({
   setAuth: (user, token) => {
     localStorage.setItem('token', token);
     set({ user, token, isAuthenticated: true, isLoading: false });
+  },
+
+  googleLogin: async (idToken) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await api.post<AuthResponse>('/auth/google', { idToken });
+      const { accessToken, refreshToken, user } = response.data;
+      localStorage.setItem('token', accessToken);
+      localStorage.setItem('refreshToken', refreshToken);
+      set({ user, token: accessToken, isAuthenticated: true, isLoading: false });
+    } catch (err: any) {
+      const msg = err.response?.data?.message || 'Google sign-in failed.';
+      set({ error: msg, isLoading: false });
+      throw new Error(msg);
+    }
   },
 
   login: async (credentials) => {

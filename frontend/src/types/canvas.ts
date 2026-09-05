@@ -1,8 +1,10 @@
 export type ToolType =
   | 'select'
+  | 'hand'
   | 'freehand'
   | 'rect'
   | 'ellipse'
+  | 'diamond'
   | 'line'
   | 'arrow'
   | 'text'

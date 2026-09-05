@@ -1,6 +1,6 @@
 export interface BoardElement {
   elementId: string;
-  type: 'rect' | 'ellipse' | 'line' | 'arrow' | 'freehand' | 'text' | 'sticky' | 'image';
+  type: 'rect' | 'ellipse' | 'diamond' | 'line' | 'arrow' | 'freehand' | 'text' | 'sticky' | 'image';
   props: Record<string, any>;
   zIndex: number;
   version: number;

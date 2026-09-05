@@ -188,6 +188,33 @@ public class BoardService {
         return shareLink;
     }
 
+    public BoardDto accessBoardByShareToken(User currentUser, String token) {
+        Board board = boardRepository.findAll().stream()
+                .filter(b -> b.getShareLink() != null && token.equals(b.getShareLink().getToken()))
+                .findFirst()
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Invalid or expired share link"));
+
+        if (currentUser != null) {
+            if (board.getCollaborators() == null) {
+                board.setCollaborators(new ArrayList<>());
+            }
+            boolean exists = board.getCollaborators().stream().anyMatch(c -> c.getUserId().equals(currentUser.getId()));
+            if (!exists && !board.getOwnerId().equals(currentUser.getId())) {
+                String role = board.getShareLink().getDefaultRole() != null ? board.getShareLink().getDefaultRole() : "VIEWER";
+                board.getCollaborators().add(Collaborator.builder()
+                        .userId(currentUser.getId())
+                        .role(role)
+                        .addedAt(Instant.now())
+                        .build());
+                boardRepository.save(board);
+            }
+        }
+
+        String ownerName = userRepository.findById(board.getOwnerId()).map(User::getName).orElse("Unknown");
+        String currentUserId = currentUser != null ? currentUser.getId() : "";
+        return BoardDto.fromEntity(board, currentUserId, ownerName);
+    }
+
     public void verifyUserAccess(String userId, Board board) {
         boolean isOwner = board.getOwnerId().equals(userId);
         boolean isCollaborator = board.getCollaborators() != null &&

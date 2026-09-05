@@ -89,6 +89,12 @@ public class BoardController {
         return ResponseEntity.ok(boardService.generateShareLink(currentUser, boardId, defaultRole));
     }
 
+    @GetMapping("/share/{token}")
+    public ResponseEntity<BoardDto> accessBoardByShareToken(@AuthenticationPrincipal User currentUser,
+                                                            @PathVariable("token") String token) {
+        return ResponseEntity.ok(boardService.accessBoardByShareToken(currentUser, token));
+    }
+
     @PostMapping("/{id}/summary")
     public ResponseEntity<com.kolab.kanvas.dto.SummaryDto> generateSummary(@AuthenticationPrincipal User currentUser,
                                                                           @PathVariable("id") String boardId,

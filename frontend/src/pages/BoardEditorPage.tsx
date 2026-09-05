@@ -2,15 +2,16 @@ import React, { useEffect, useState } from 'react';
 import { api } from '../services/api';
 import type { Board } from '../types/board';
 import { useBoardStore } from '../hooks/useBoardStore';
+import { useAuthStore } from '../hooks/useAuthStore';
 import { useWebSocket } from '../hooks/useWebSocket';
 import { CanvasRenderer } from '../components/canvas/CanvasRenderer';
 import { CursorLayer } from '../components/canvas/CursorLayer';
 import { Toolbar } from '../components/toolbar/Toolbar';
 import { PresenceBar } from '../components/toolbar/PresenceBar';
+import { UserProfileModal } from '../components/profile/UserProfileModal';
+import { KanvasLogo } from '../components/common/KanvasLogo';
 import { ArrowLeft, Share2, Sparkles, FileText, Download } from 'lucide-react';
 import { exportBoardAsPng } from '../utils/exportBoard';
-
-import { ThemeToggle } from '../components/toolbar/ThemeToggle';
 
 interface BoardEditorPageProps {
   boardId: string;
@@ -28,7 +29,9 @@ export const BoardEditorPage: React.FC<BoardEditorPageProps> = ({
   onOpenTranscriptPanel,
 }) => {
   const [isLoading, setIsLoading] = useState(true);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const { setBoardData, boardName, userRole, addElement, updateElement, deleteElement, undo, redo, selectedElementId } = useBoardStore();
+  const { user } = useAuthStore();
 
   const { sendElementOp, sendCursorMove } = useWebSocket(boardId);
 
@@ -103,6 +106,7 @@ export const BoardEditorPage: React.FC<BoardEditorPageProps> = ({
           <button onClick={onBackToDashboard} className="btn-secondary" style={{ padding: '0.4rem 0.75rem' }}>
             <ArrowLeft size={18} /> Boards
           </button>
+          <KanvasLogo size="small" />
           <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.125rem', fontWeight: 600, color: 'var(--text-primary)' }}>
             {boardName}
           </h2>
@@ -120,7 +124,29 @@ export const BoardEditorPage: React.FC<BoardEditorPageProps> = ({
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           <PresenceBar />
-          <ThemeToggle />
+
+          <button
+            onClick={() => setIsProfileModalOpen(true)}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '32px',
+              height: '32px',
+              borderRadius: '50%',
+              background: 'var(--bg-secondary)',
+              border: '1px solid var(--border-color)',
+              cursor: 'pointer',
+              padding: 0,
+            }}
+            title="Profile Settings"
+          >
+            <img
+              src={user?.avatarUrl || `https://api.dicebear.com/7.x/bottts/svg?seed=${user?.email}`}
+              alt={user?.name}
+              style={{ width: '100%', height: '100%', borderRadius: '50%' }}
+            />
+          </button>
 
           <button onClick={() => {
             const canvas = document.querySelector('canvas');
@@ -141,7 +167,7 @@ export const BoardEditorPage: React.FC<BoardEditorPageProps> = ({
             </button>
           )}
 
-          {onOpenShareModal && userRole === 'OWNER' && (
+          {onOpenShareModal && (
             <button onClick={onOpenShareModal} className="btn-primary" style={{ padding: '0.4rem 0.875rem' }}>
               <Share2 size={16} /> Share
             </button>
@@ -162,6 +188,11 @@ export const BoardEditorPage: React.FC<BoardEditorPageProps> = ({
         onUndo={handleUndo}
         onRedo={handleRedo}
         onDeleteSelected={handleDeleteSelected}
+      />
+
+      <UserProfileModal
+        isOpen={isProfileModalOpen}
+        onClose={() => setIsProfileModalOpen(false)}
       />
     </div>
   );
