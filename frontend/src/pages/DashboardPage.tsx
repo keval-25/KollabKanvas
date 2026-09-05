@@ -203,7 +203,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onSelectBoard }) =
           } : { display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
             {filteredBoards.map((b) => {
               const elemCount = b.elementsCount ?? (b.elements?.length || 0);
-              const collabCount = b.collaboratorsCount ?? (b.collaboratorRoles ? Object.keys(b.collaboratorRoles).length + 1 : 1);
+              const collabCount = b.collaboratorsCount ?? (b.collaborators ? b.collaborators.length + 1 : 1);
               const ownerName = b.ownerName || (b.ownerId === user?.id ? user?.name : 'Owner');
 
               return (

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAuthStore } from '../../hooks/useAuthStore';
 import { api } from '../../services/api';
-import { X, User, Key, Lock, Check, Moon, Sun, Coffee, Shield } from 'lucide-react';
+import { X, Key, Lock, Check, Moon, Sun, Coffee, Shield } from 'lucide-react';
 import type { ThemeType } from '../toolbar/ThemeToggle';
 
 interface UserProfileModalProps {

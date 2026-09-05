@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { api } from './services/api';
 import { useAuthStore } from './hooks/useAuthStore';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
@@ -28,7 +29,7 @@ export function App() {
         const token = pathname.replace('/share/', '').trim();
         if (token && isAuthenticated) {
           try {
-            const response = await import('./services/api').then(m => m.api.get(`/boards/share/${token}`));
+            const response = await api.get(`/boards/share/${token}`);
             if (response.data && response.data.id) {
               setActiveBoardId(response.data.id);
               window.history.replaceState({}, '', '/');

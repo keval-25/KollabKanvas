@@ -71,7 +71,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onSwitchToRegister, onLogi
 
         <div style={{ display: 'flex', alignItems: 'center', margin: '1.25rem 0', gap: '0.75rem' }}>
           <div style={{ flex: 1, height: '1px', background: 'rgba(255, 255, 255, 0.1)' }} />
-          <span style={{ fontSize: '0.75rem', color: '#64748b', textTransform: 'uppercase', tracking: '0.05em' }}>Or with email</span>
+          <span style={{ fontSize: '0.75rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Or with email</span>
           <div style={{ flex: 1, height: '1px', background: 'rgba(255, 255, 255, 0.1)' }} />
         </div>
 

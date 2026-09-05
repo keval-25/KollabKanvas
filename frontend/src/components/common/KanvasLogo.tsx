@@ -1,16 +1,19 @@
 import React from 'react';
 
 interface KanvasLogoProps {
-  size?: number;
+  size?: number | 'small' | 'medium' | 'large';
   showText?: boolean;
+  animated?: boolean;
 }
 
-export const KanvasLogo: React.FC<KanvasLogoProps> = ({ size = 32, showText = true }) => {
+export const KanvasLogo: React.FC<KanvasLogoProps> = ({ size = 'medium', showText = true }) => {
+  const numericSize = typeof size === 'number' ? size : size === 'small' ? 24 : size === 'large' ? 44 : 32;
+
   return (
     <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.625rem', userSelect: 'none' }}>
       <svg
-        width={size}
-        height={size}
+        width={numericSize}
+        height={numericSize}
         viewBox="0 0 40 40"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
@@ -32,7 +35,7 @@ export const KanvasLogo: React.FC<KanvasLogoProps> = ({ size = 32, showText = tr
       {showText && (
         <span style={{
           fontFamily: 'var(--font-heading)',
-          fontSize: size * 0.55 + 'px',
+          fontSize: numericSize * 0.55 + 'px',
           fontWeight: 800,
           letterSpacing: '-0.02em',
           color: 'var(--text-primary)',
