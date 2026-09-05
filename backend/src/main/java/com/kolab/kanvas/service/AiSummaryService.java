@@ -104,31 +104,65 @@ public class AiSummaryService {
     }
 
     private String callExternalAiService(String extractedContent, Board board) {
-        if (aiApiKey != null && !aiApiKey.isBlank()) {
+        String key = (aiApiKey != null && !aiApiKey.isBlank()) ? aiApiKey : System.getenv("GEMINI_API_KEY");
+
+        if (key != null && !key.isBlank()) {
             try {
                 RestTemplate restTemplate = new RestTemplate();
                 HttpHeaders headers = new HttpHeaders();
                 headers.setContentType(MediaType.APPLICATION_JSON);
-                headers.set("x-api-key", aiApiKey);
-                headers.set("anthropic-version", "2023-06-01");
 
-                Map<String, Object> body = Map.of(
-                        "model", aiModel,
-                        "max_tokens", 1024,
-                        "messages", List.of(Map.of(
-                                "role", "user",
-                                "content", "Provide a concise executive summary of this whiteboard with 3 sections: ### Key Takeaways, ### Action Items, and ### Major Themes.\n\n" + extractedContent
-                        ))
-                );
+                // Google Gemini API Request Format
+                if (aiApiUrl.contains("googleapis") || aiApiUrl.contains("gemini") || System.getenv("GEMINI_API_KEY") != null) {
+                    String fullGeminiUrl = aiApiUrl.contains("key=") ? aiApiUrl : (aiApiUrl + "?key=" + key);
+                    Map<String, Object> body = Map.of(
+                            "contents", List.of(Map.of(
+                                    "parts", List.of(Map.of(
+                                            "text", "Provide a concise executive summary of this whiteboard with 3 sections: ### Key Takeaways, ### Action Items, and ### Major Themes.\n\n" + extractedContent
+                                    ))
+                            ))
+                    );
 
-                HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(body, headers);
-                ResponseEntity<Map> response = restTemplate.exchange(aiApiUrl, HttpMethod.POST, requestEntity, Map.class);
+                    HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(body, headers);
+                    ResponseEntity<Map> response = restTemplate.exchange(fullGeminiUrl, HttpMethod.POST, requestEntity, Map.class);
 
-                if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-                    List contentList = (List) response.getBody().get("content");
-                    if (contentList != null && !contentList.isEmpty()) {
-                        Map firstBlock = (Map) contentList.get(0);
-                        return (String) firstBlock.get("text");
+                    if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                        List candidates = (List) response.getBody().get("candidates");
+                        if (candidates != null && !candidates.isEmpty()) {
+                            Map firstCand = (Map) candidates.get(0);
+                            Map contentMap = (Map) firstCand.get("content");
+                            if (contentMap != null) {
+                                List parts = (List) contentMap.get("parts");
+                                if (parts != null && !parts.isEmpty()) {
+                                    Map firstPart = (Map) parts.get(0);
+                                    return (String) firstPart.get("text");
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    // Anthropic / Standard OpenAI Format
+                    headers.set("x-api-key", key);
+                    headers.set("anthropic-version", "2023-06-01");
+
+                    Map<String, Object> body = Map.of(
+                            "model", aiModel,
+                            "max_tokens", 1024,
+                            "messages", List.of(Map.of(
+                                    "role", "user",
+                                    "content", "Provide a concise executive summary of this whiteboard with 3 sections: ### Key Takeaways, ### Action Items, and ### Major Themes.\n\n" + extractedContent
+                            ))
+                    );
+
+                    HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(body, headers);
+                    ResponseEntity<Map> response = restTemplate.exchange(aiApiUrl, HttpMethod.POST, requestEntity, Map.class);
+
+                    if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                        List contentList = (List) response.getBody().get("content");
+                        if (contentList != null && !contentList.isEmpty()) {
+                            Map firstBlock = (Map) contentList.get(0);
+                            return (String) firstBlock.get("text");
+                        }
                     }
                 }
             } catch (Exception e) {
