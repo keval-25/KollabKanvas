@@ -1,27 +1,31 @@
 import React from 'react';
 import { useBoardStore } from '../../hooks/useBoardStore';
 import type { ToolType } from '../../types/canvas';
-import { MousePointer, Edit2, Square, Circle, Minus, Type, StickyNote, Undo, Redo, Trash2 } from 'lucide-react';
+import { MousePointer, Hand, Edit2, Square, Circle, Diamond, MoveRight, Type, StickyNote, Eraser, Undo, Redo, Trash2, RotateCcw } from 'lucide-react';
 
 interface ToolbarProps {
   onUndo: () => void;
   onRedo: () => void;
   onDeleteSelected: () => void;
+  onClearCanvas?: () => void;
 }
 
-export const Toolbar: React.FC<ToolbarProps> = ({ onUndo, onRedo, onDeleteSelected }) => {
+export const Toolbar: React.FC<ToolbarProps> = ({ onUndo, onRedo, onDeleteSelected, onClearCanvas }) => {
   const { activeTool, setActiveTool, strokeColor, setStrokeColor, userRole, selectedElementId } = useBoardStore();
 
   const isReadOnly = userRole === 'VIEWER' || userRole === 'COMMENTER';
 
   const tools: { id: ToolType; label: string; icon: React.FC<any> }[] = [
     { id: 'select', label: 'Select / Move', icon: MousePointer },
-    { id: 'freehand', label: 'Pen / Draw', icon: Edit2 },
+    { id: 'hand', label: 'Pan / Hand', icon: Hand },
+    { id: 'freehand', label: 'Pencil / Draw', icon: Edit2 },
     { id: 'rect', label: 'Rectangle', icon: Square },
     { id: 'ellipse', label: 'Ellipse', icon: Circle },
-    { id: 'line', label: 'Line', icon: Minus },
+    { id: 'diamond', label: 'Diamond', icon: Diamond },
+    { id: 'arrow', label: 'Arrow', icon: MoveRight },
     { id: 'text', label: 'Text Box', icon: Type },
     { id: 'sticky', label: 'Sticky Note', icon: StickyNote },
+    { id: 'eraser', label: 'Eraser', icon: Eraser },
   ];
 
   const colors = ['#f8fafc', '#ef4444', '#f97316', '#eab308', '#22c55e', '#06b6d4', '#3b82f6', '#a855f7'];
@@ -35,7 +39,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onUndo, onRedo, onDeleteSelect
       zIndex: 40,
       display: 'flex',
       flexDirection: 'column',
-      gap: '1rem',
+      gap: '0.75rem',
     }}>
       {/* Tool Selector Panel */}
       <div className="glass-panel" style={{
@@ -43,6 +47,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onUndo, onRedo, onDeleteSelect
         flexDirection: 'column',
         gap: '0.375rem',
         padding: '0.5rem',
+        maxHeight: '75vh',
+        overflowY: 'auto',
       }}>
         {tools.map((t) => {
           const Icon = t.icon;
@@ -51,7 +57,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onUndo, onRedo, onDeleteSelect
             <button
               key={t.id}
               title={t.label}
-              disabled={isReadOnly && t.id !== 'select'}
+              disabled={isReadOnly && t.id !== 'select' && t.id !== 'hand'}
               onClick={() => setActiveTool(t.id)}
               style={{
                 width: '40px',
@@ -59,8 +65,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onUndo, onRedo, onDeleteSelect
                 borderRadius: '8px',
                 border: 'none',
                 background: isActive ? 'var(--accent-primary)' : 'transparent',
-                color: isActive ? '#ffffff' : isReadOnly && t.id !== 'select' ? 'var(--text-muted)' : 'var(--text-secondary)',
-                cursor: isReadOnly && t.id !== 'select' ? 'not-allowed' : 'pointer',
+                color: isActive ? '#ffffff' : isReadOnly && t.id !== 'select' && t.id !== 'hand' ? 'var(--text-muted)' : 'var(--text-secondary)',
+                cursor: isReadOnly && t.id !== 'select' && t.id !== 'hand' ? 'not-allowed' : 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -79,7 +85,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onUndo, onRedo, onDeleteSelect
           title="Undo"
           disabled={isReadOnly}
           onClick={onUndo}
-          style={{ width: '40px', height: '40px', borderRadius: '8px', border: 'none', background: 'transparent', color: '#94a3b8', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          style={{ width: '40px', height: '40px', borderRadius: '8px', border: 'none', background: 'transparent', color: 'var(--text-secondary)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
         >
           <Undo size={18} />
         </button>
@@ -87,10 +93,20 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onUndo, onRedo, onDeleteSelect
           title="Redo"
           disabled={isReadOnly}
           onClick={onRedo}
-          style={{ width: '40px', height: '40px', borderRadius: '8px', border: 'none', background: 'transparent', color: '#94a3b8', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          style={{ width: '40px', height: '40px', borderRadius: '8px', border: 'none', background: 'transparent', color: 'var(--text-secondary)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
         >
           <Redo size={18} />
         </button>
+
+        {onClearCanvas && !isReadOnly && (
+          <button
+            title="Clear Canvas"
+            onClick={onClearCanvas}
+            style={{ width: '40px', height: '40px', borderRadius: '8px', border: 'none', background: 'transparent', color: 'var(--text-secondary)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          >
+            <RotateCcw size={18} />
+          </button>
+        )}
 
         {selectedElementId && !isReadOnly && (
           <button
@@ -131,3 +147,4 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onUndo, onRedo, onDeleteSelect
     </div>
   );
 };
+

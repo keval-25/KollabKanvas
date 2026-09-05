@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useAuthStore } from '../hooks/useAuthStore';
-import { UserPlus, Sparkles } from 'lucide-react';
+import { UserPlus } from 'lucide-react';
+import { KanvasLogo } from '../components/common/KanvasLogo';
+import { GoogleAuthButton } from '../components/auth/GoogleAuthButton';
 
 interface RegisterPageProps {
   onSwitchToLogin: () => void;
@@ -39,23 +41,13 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({ onSwitchToLogin, onR
         padding: '2.5rem',
       }}>
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <div style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: '48px',
-            height: '48px',
-            borderRadius: '12px',
-            background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
-            boxShadow: '0 4px 20px rgba(99, 102, 241, 0.4)',
-            marginBottom: '1rem',
-          }}>
-            <Sparkles size={24} color="#ffffff" />
+          <div style={{ display: 'inline-block', marginBottom: '1rem' }}>
+            <KanvasLogo size="large" animated />
           </div>
-          <h1 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.75rem', fontWeight: 700, color: '#f8fafc' }}>
+          <h1 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.5rem', fontWeight: 700, color: '#f8fafc', marginTop: '0.5rem' }}>
             Create Account
           </h1>
-          <p style={{ color: '#94a3b8', fontSize: '0.875rem', marginTop: '0.5rem' }}>
+          <p style={{ color: '#94a3b8', fontSize: '0.875rem', marginTop: '0.25rem' }}>
             Join KollabKanvas and collaborate in real-time
           </p>
         </div>
@@ -73,6 +65,16 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({ onSwitchToLogin, onR
             {error}
           </div>
         )}
+
+        <div style={{ marginBottom: '1.25rem' }}>
+          <GoogleAuthButton onSuccess={onRegisterSuccess} />
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', margin: '1.25rem 0', gap: '0.75rem' }}>
+          <div style={{ flex: 1, height: '1px', background: 'rgba(255, 255, 255, 0.1)' }} />
+          <span style={{ fontSize: '0.75rem', color: '#64748b', textTransform: 'uppercase', tracking: '0.05em' }}>Or with email</span>
+          <div style={{ flex: 1, height: '1px', background: 'rgba(255, 255, 255, 0.1)' }} />
+        </div>
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
           <div>
@@ -153,3 +155,4 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({ onSwitchToLogin, onR
     </div>
   );
 };
+

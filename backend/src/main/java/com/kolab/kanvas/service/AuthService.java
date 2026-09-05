@@ -92,4 +92,43 @@ public class AuthService {
             jwtTokenProvider.invalidateToken(token);
         }
     }
+
+    public void changePassword(User currentUser, ChangePasswordRequest request) {
+        if (!passwordEncoder.matches(request.getOldPassword(), currentUser.getPasswordHash())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Current password is incorrect");
+        }
+
+        currentUser.setPasswordHash(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(currentUser);
+    }
+
+    public AuthResponse googleLogin(GoogleAuthRequest request) {
+        String email = request.getEmail() != null ? request.getEmail().toLowerCase().trim() : null;
+        if (email == null || email.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Google authentication email is required");
+        }
+
+        User user = userRepository.findByEmail(email).orElseGet(() -> {
+            String name = request.getName() != null && !request.getName().isBlank() ? request.getName() : email.split("@")[0];
+            String avatar = request.getAvatarUrl() != null ? request.getAvatarUrl() : "https://api.dicebear.com/7.x/bottts/svg?seed=" + email;
+            User newUser = User.builder()
+                    .name(name)
+                    .email(email)
+                    .passwordHash(passwordEncoder.encode(java.util.UUID.randomUUID().toString()))
+                    .roles(Set.of("ROLE_USER"))
+                    .avatarUrl(avatar)
+                    .build();
+            return userRepository.save(newUser);
+        });
+
+        String accessToken = jwtTokenProvider.generateAccessToken(user.getId(), user.getEmail());
+        String refreshToken = jwtTokenProvider.generateRefreshToken(user.getId(), user.getEmail());
+
+        return AuthResponse.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .tokenType("Bearer")
+                .user(UserDto.fromEntity(user))
+                .build();
+    }
 }

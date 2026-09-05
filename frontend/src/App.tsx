@@ -21,6 +21,31 @@ export function App() {
     checkAuth();
   }, [checkAuth]);
 
+  useEffect(() => {
+    const handleShareLinkRouting = async () => {
+      const pathname = window.location.pathname;
+      if (pathname.startsWith('/share/')) {
+        const token = pathname.replace('/share/', '').trim();
+        if (token && isAuthenticated) {
+          try {
+            const response = await import('./services/api').then(m => m.api.get(`/boards/share/${token}`));
+            if (response.data && response.data.id) {
+              setActiveBoardId(response.data.id);
+              window.history.replaceState({}, '', '/');
+            }
+          } catch (err) {
+            alert('Share link invalid or expired.');
+            window.history.replaceState({}, '', '/');
+          }
+        }
+      }
+    };
+
+    if (isAuthenticated) {
+      handleShareLinkRouting();
+    }
+  }, [isAuthenticated]);
+
   if (isLoading) {
     return (
       <div style={{
