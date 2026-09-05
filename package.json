@@ -1,4 +1,9 @@
 {
+  "name": "kollab-kanvas-root",
+  "private": true,
+  "scripts": {
+    "build": "npm --prefix frontend run build"
+  },
   "devDependencies": {
     "shadcn": "^4.21.0"
   }

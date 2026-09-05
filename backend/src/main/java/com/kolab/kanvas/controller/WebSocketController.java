@@ -9,6 +9,7 @@ import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
+import java.util.Map;
 
 @Controller
 @RequiredArgsConstructor
@@ -16,12 +17,27 @@ public class WebSocketController {
 
     private final SimpMessagingTemplate messagingTemplate;
     private final ConflictResolutionService conflictResolutionService;
+    private final com.kolab.kanvas.service.TranscriptService transcriptService;
 
     @MessageMapping("/board/{boardId}/edit")
     public void handleEditOperation(@DestinationVariable("boardId") String boardId,
                                     ElementOperationMessage message) {
         message.setBoardId(boardId);
         ElementOperationMessage resolved = conflictResolutionService.processElementOperation(message);
+
+        // Record transcript entry for real-time board audit log
+        try {
+            transcriptService.logAction(
+                    boardId,
+                    message.getUserId() != null ? message.getUserId() : "system",
+                    message.getUserName() != null ? message.getUserName() : "Collaborator",
+                    message.getOp() != null ? message.getOp() : "EDIT",
+                    message.getPayload() != null ? message.getPayload() : Map.of("elementId", message.getElementId())
+            );
+        } catch (Exception e) {
+            // Non-blocking catch to ensure drawing latency is unhindered
+        }
+
         messagingTemplate.convertAndSend("/topic/board/" + boardId + "/elements", resolved);
     }
 

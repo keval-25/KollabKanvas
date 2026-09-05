@@ -28,6 +28,7 @@ services:
       - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
       - AI_API_KEY=${AI_API_KEY}
       - AI_API_URL=${AI_API_URL}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
     depends_on:
       mongo:
         condition: service_healthy
