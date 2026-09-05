@@ -39,6 +39,8 @@ public class BoardService {
                         .build()))
                 .elements(createInitialTemplateElements(request.getTemplate(), currentUser.getId()))
                 .isArchived(false)
+                .createdAt(Instant.now())
+                .updatedAt(Instant.now())
                 .build();
 
         Board saved = boardRepository.save(board);
@@ -114,6 +116,8 @@ public class BoardService {
                         .build()))
                 .elements(new ArrayList<>(source.getElements()))
                 .isArchived(false)
+                .createdAt(Instant.now())
+                .updatedAt(Instant.now())
                 .build();
 
         Board saved = boardRepository.save(copy);

@@ -31,7 +31,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   googleLogin: async (idToken) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await api.post<AuthResponse>('/auth/google', { idToken });
+      const response = await api.post<AuthResponse>('/auth/google', { credential: idToken, idToken });
       const { accessToken, refreshToken, user } = response.data;
       localStorage.setItem('token', accessToken);
       localStorage.setItem('refreshToken', refreshToken);

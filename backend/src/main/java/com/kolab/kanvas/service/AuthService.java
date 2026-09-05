@@ -5,6 +5,7 @@ import com.kolab.kanvas.model.User;
 import com.kolab.kanvas.repository.UserRepository;
 import com.kolab.kanvas.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -12,6 +13,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Set;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -103,20 +105,58 @@ public class AuthService {
     }
 
     public AuthResponse googleLogin(GoogleAuthRequest request) {
+        String token = request.getToken();
         String email = request.getEmail() != null ? request.getEmail().toLowerCase().trim() : null;
-        if (email == null || email.isBlank()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Google authentication email is required");
+        String name = request.getName();
+        String avatarUrl = request.getAvatarUrl();
+
+        // If email is not passed directly, parse the Google ID Token JWT payload
+        if ((email == null || email.isBlank()) && token != null && !token.isBlank()) {
+            if (token.contains(".")) {
+                try {
+                    String[] parts = token.split("\\.");
+                    if (parts.length >= 2) {
+                        String payloadJson = new String(java.util.Base64.getUrlDecoder().decode(parts[1]), java.nio.charset.StandardCharsets.UTF_8);
+                        com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+                        com.fasterxml.jackson.databind.JsonNode node = mapper.readTree(payloadJson);
+
+                        if (node.has("email")) {
+                            email = node.get("email").asText().toLowerCase().trim();
+                        }
+                        if ((name == null || name.isBlank()) && node.has("name")) {
+                            name = node.get("name").asText();
+                        }
+                        if ((avatarUrl == null || avatarUrl.isBlank()) && node.has("picture")) {
+                            avatarUrl = node.get("picture").asText();
+                        }
+                    }
+                } catch (Exception e) {
+                    log.warn("Could not parse Google ID token payload: {}", e.getMessage());
+                }
+            }
+
+            // Fallback for mock tokens / dev testing
+            if (email == null || email.isBlank()) {
+                String sanitizedToken = token.replaceAll("[^a-zA-Z0-9]", "");
+                email = "user_" + (sanitizedToken.length() > 8 ? sanitizedToken.substring(0, 8) : sanitizedToken) + "@google.com";
+            }
         }
 
-        User user = userRepository.findByEmail(email).orElseGet(() -> {
-            String name = request.getName() != null && !request.getName().isBlank() ? request.getName() : email.split("@")[0];
-            String avatar = request.getAvatarUrl() != null ? request.getAvatarUrl() : "https://api.dicebear.com/7.x/bottts/svg?seed=" + email;
+        if (email == null || email.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Google authentication credential token or email is required");
+        }
+
+        final String finalEmail = email;
+        final String finalName = (name != null && !name.isBlank()) ? name : email.split("@")[0];
+        final String finalAvatar = (avatarUrl != null && !avatarUrl.isBlank()) ? avatarUrl : "https://api.dicebear.com/7.x/bottts/svg?seed=" + email;
+
+        User user = userRepository.findByEmail(finalEmail).orElseGet(() -> {
             User newUser = User.builder()
-                    .name(name)
-                    .email(email)
+                    .name(finalName)
+                    .email(finalEmail)
                     .passwordHash(passwordEncoder.encode(java.util.UUID.randomUUID().toString()))
                     .roles(Set.of("ROLE_USER"))
-                    .avatarUrl(avatar)
+                    .avatarUrl(finalAvatar)
                     .build();
             return userRepository.save(newUser);
         });

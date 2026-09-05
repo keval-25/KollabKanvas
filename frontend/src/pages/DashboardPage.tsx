@@ -249,7 +249,11 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ onSelectBoard }) =
 
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid var(--border-color)', paddingTop: '0.75rem' }}>
                     <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
-                      <Clock size={12} /> {new Date(b.updatedAt || b.createdAt).toLocaleDateString()}
+                      <Clock size={12} /> {(() => {
+                        const raw = b.updatedAt || b.createdAt;
+                        const d = raw ? new Date(raw) : new Date();
+                        return (!isNaN(d.getTime()) && d.getFullYear() > 1975) ? d.toLocaleDateString() : new Date().toLocaleDateString();
+                      })()}
                     </span>
 
                     <div style={{ display: 'flex', gap: '0.375rem' }}>
